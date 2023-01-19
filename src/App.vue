@@ -1,15 +1,19 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="container">
+    <HelloWorld msg="Verify your Excel Files"/>
+    <excelImport/>
+  </div>
+  
 </template>
 
 <script>
 import HelloWorld from './components/HelloWorld.vue'
-
+import excelImport from './components/excelImport.vue';
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    HelloWorld,
+    excelImport
   }
 }
 </script>
@@ -22,5 +26,8 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+.container{
+  /* background-color:  #7EC8E3; */
 }
 </style>
