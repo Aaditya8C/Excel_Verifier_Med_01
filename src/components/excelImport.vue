@@ -1,9 +1,23 @@
 <template>
 
+    <!-- For displaying file contents -->
     <div class="mainFile">
         <div class="file">
             <!-- {{ fileData }} -->
             <table id="excelData">
+                <!-- <atom-spinner v-show = 'isLoading' :animation="1000" :size="100" color="#ff1d5e"/>  -->
+                <!-- <orbit-spinner :animation-duration="1200" :size="55" color="#ff1d5e" /> -->
+                <!-- <circles-to-rhombuses-spinner :animation-duration="1200" :circles-num="3" :circle-size="15" color="#ff1d5e" /> -->
+                <div id="loader" v-show="isLoading">
+                    <!-- <scaling-squares-spinner :animation-duration="1500" :size="60" color="#21B6A8" /> -->
+                    <!-- <spring-spinner :animation-duration="3000" :size="60" color= "#21B6A8" /> -->
+                    <breeding-rhombus-spinner :animation-duration="1500" :size="65" color="#21B6A8" />
+                </div>
+
+                <!-- <div id="loader2" v-show="isLoading2">
+                    <scaling-squares-spinner :animation-duration="1500" :size="60" color="#21B6A8" />
+                </div> -->
+
                 <thead id="headings">
                     <tr>
                         <th v-for="item in headers" :key="item" class="tHead">
@@ -23,6 +37,7 @@
         </div>
     </div>
 
+    <!-- Various buttons such as Select,Verify,Export -->
     <div class="main-btn">
         <div class="first">
             <input type="file" id="fBtn" v-on:change="addFile" placeholder="Choose XL File" />
@@ -35,6 +50,7 @@
         <excelExport :fileData="fileData" :file1="file1" />
     </div>
 
+    <!-- Displays no rows affected & unaffected -->
     <div class="rowsAffect1">
         <div class="rowsAffect">
             <p>Affected Rows: {{ rowsAffected }}</p>
@@ -42,15 +58,13 @@
         </div>
     </div>
 
+    
+    <!-- Displays error table -->
     <div v-show="isShownErr" class="mainError">
-        <!-- <div class="err1">
-            <ul class="errHeadings">
-                <li class="el2">Row No.</li>
-                <li class="el2">Name of field</li>
-                <li class="el2">Error</li>
-                <li class="el2">Error Description</li>
-            </ul>
-        </div> -->
+        <div>
+            <h2 id="eH">Error Table</h2>
+        </div>
+
         <div class="errorDetails">
             <div class="errList">
                 <ul class="el1">
@@ -99,6 +113,8 @@
                 <p>Previous Data: </p>
                 <p class="ip"> {{ this.tempErr }}</p>
                 <p>Enter new Data</p>
+
+                <!-- Various input fields for email,password,username,phone no,etc. -->
                 <input type="text" class="ip" v-model='tempResolve' v-show='userDrop'
                     placeholder="Enter correct data" />
                 <input type="email" class="ip" v-model='tempResolve' v-show='emailDrop'
@@ -107,6 +123,9 @@
                     placeholder="Enter correct data" />
                 <input type="number" class="ip" v-model='tempResolve' v-show='phoneDrop'
                     placeholder="Enter correct data" />
+
+
+                <!-- Various Dropdowns for state,city,country code etc. -->
                 <select id="f" class="ipD" v-show="countryDrop" v-model="tempResolve">
                     <option>Select</option>
                     <option v-for="code in callingCodes" :key="code" :value='code.value'>{{ code.label }}</option>
@@ -120,31 +139,36 @@
                     <option v-for="c in cityNames1[tempIndex - 1]" :key="c" :value='c'>{{ c }}</option>
                 </select>
 
-                <button class="tBtn" v-on:click="saveResolve">Save Data</button>
+                <br><button class="tBtn" v-on:click="saveResolve">Save Data</button>
             </div>
         </div>
     </div>
 
 </template>
+
 <script>
-// import readXlsxFile from 'read-excel-file'
-// import moment from 'moment'
 import * as XLSX from 'xlsx'
 import excelExport from './excelExport.vue';
 import countryCodes from 'country-codes-list';
 import { City, State } from 'country-state-city';
-// import { Country, State, City } from 'country-state-city';
+// import { ScalingSquaresSpinner } from 'epic-spinners'
+import { BreedingRhombusSpinner } from 'epic-spinners'
 export default {
     name: 'excelImport',
     components: {
-        excelExport
+        excelExport,
+        // ScalingSquaresSpinner,
+        BreedingRhombusSpinner,
     },
     methods: {
         // for marking errors with red underline ------Incomplete
         exportFile() {
             alert("Hello")
         },
+
+        //Method for showing the error table
         showErrorTable() {
+
             if (this.errData.length > 0) {
                 this.isShownErr = !this.isShownErr
                 alert("Errors have been detected and displayed below")
@@ -153,57 +177,28 @@ export default {
                 alert("Excel file doesn't contain any errors")
             }
         },
+
+        //Method for importing the file
         addFile(e) {
-
-
             this.countryCodeList = countryCodes.customList('countryCode', '{countryCallingCode}')
-            this.file = e.target.files[0];
-            // this.callingCodes.push(Object.values(this.countryCodeList))
             Object.values(this.countryCodeList).map((v) => {
                 this.callingCodes.push({ label: v, value: v })
             })
-            // console.log(this.callingCodes);
 
-            // this.allStateList = State.getAllStates()
-            // // console.log("States:",this.allStateList[0].name);
-            // // console.log("States:",this.allStateList);
-            // for (let s = 0; s < this.allStateList.length; s++) { 
-            //     this.allStateNames.push({label: this.allStateList[s].name,value: this.allStateList[s].name});
-            // }
-            // console.log(this.stateNames);
-
-
-
-
-            // console.log("All state names:",this.allStateNames);
-            // let keysCode = [];
-            // for (let i = 0; i < codessss.length; i++) {
-            //     keysCode.push( this.getKeyByValue(this.countryCodeList, codessss[i]))
-
-            // }
-            // // console.log("Codesss", this.getKeyByValue(this.countryCodeList, codessss));
-            // console.log("Codessss",keysCode);
-            //fileReader function
+            this.file = e.target.files[0];
             const reader = new FileReader();
             reader.onload = (e) => {
                 const data = e.target.result;
                 const wb = XLSX.read(data, { type: 'binary' });
-
-                //methods
                 const sname = wb.SheetNames[0];
                 const ws = wb.Sheets[sname];
                 this.fileData = XLSX.utils.sheet_to_json(ws, { header: 1 })
                 this.rowsCorrect = this.fileData.length;
             }
             reader.readAsBinaryString(this.file);
-
         },
+
         //Method for converting names of header into snake case
-        // snake_case_string(str) {
-        //     return str && str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]|\b)|[A-Z]?[a-z]+[0-9]|[A-Z]|[0-9]+/g)
-        //         .map(s => s.toLowerCase())
-        //         .join('_');
-        // },
         toSnakeCase(str = '') {
             const strArr = str.split(' ');
             const snakeArr = strArr.reduce((acc, val) => {
@@ -211,8 +206,10 @@ export default {
             }, []);
             return snakeArr.join('_');
         },
+
         //Method for validating gender column
         validate() {
+            console.log("Er", this.errData.length);
             this.errData = [];
             this.errHead = [];
             this.errDesc = [];
@@ -393,7 +390,7 @@ export default {
 
                 })
             })
-            console.log(this.errCodes);
+            // console.log(this.errCodes);
             // console.log("Errors: ", this.errData);
             // console.log("Index", this.errRowIndex);
             // console.log(City.getCitiesOfState("IN", "DL"));
@@ -456,12 +453,7 @@ export default {
             else if (this.col == 'name') {
                 if (/\d/.test(this.tempResolve)) {
                     console.log(this.tempResolve);
-                    // console.log(value[k], "is incorrect name");
                     alert("numbers not allowed in name");
-                    // this.errData.push()
-                    // this.errDesc.push("First name must be String")
-                    // this.errHead.push(k)
-                    // this.errRowIndex.push(value.no.toString())
                 }
                 else
                     this.modify();
@@ -503,6 +495,7 @@ export default {
         getKeyByValue(object, value) {
             return Object.keys(object).find(key => object[key] === value);
         },
+        //Modifying data in main file 
         modify() {
             this.userDrop = false;
             this.emailDrop = false;
@@ -521,6 +514,7 @@ export default {
             }
             alert("Information saved successfully")
         },
+        //Close button on the popup
         closePop() {
             this.userDrop = false;
             this.emailDrop = false;
@@ -533,6 +527,13 @@ export default {
         }
     },
     beforeUpdate() {
+        if (this.fileData.length <= 0) {
+            this.isLoading = true
+        }
+        else {
+            this.isLoading = false
+        }
+
         this.codeValPair = [];
         this.headers = this.fileData[0];
         let final_data = [];
@@ -606,7 +607,7 @@ export default {
                 }
             }
         }
-        console.log("Errorsssss: ", this.rowsAffected);
+        // console.log("Errorsssss: ", this.rowsAffected);
         this.rowsCorrect -= this.rowsAffected + 1
 
         //For counting the affected rows
@@ -629,19 +630,17 @@ export default {
         return {
             file: File,
             fileData: [],
-            headers: [],
-            newData: [],
+            headers: [], //for storing headers of excel 
+            newData: [], //formatted data
             errData: [],
             errDesc: [],
             errHead: [],
             index: null,
-            mkErr: false,
             isShownErr: false,
             isPop: false,
             tempErr: null,
-            tempResolve: null,
+            tempResolve: null, //new data enetered in the popup
             col: null,
-            file1: File,
             rowsAffected: 0,
             rowsCorrect: 0,
             countryCodeList: {},
@@ -659,7 +658,7 @@ export default {
             stateCodes: [], //for state or iso codes
             stateCodes1: [],
             cityNames: [],
-            cityNames1: [],
+            cityNames1: [], //only city names
             tempIndex: null,
             userDrop: false,
             emailDrop: false,
@@ -669,12 +668,33 @@ export default {
             countryDrop: false,
             passDrop: false,
             callingCodes: [],
+            isLoading: false,
+            isLoading2: false
         }
     }
 
 }
 </script>
 <style>
+#loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 25rem;
+}
+
+#loader2 {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
 .rowsAffect1 {
     display: flex;
     justify-content: center;
@@ -815,13 +835,19 @@ export default {
 }
 
 .mainError {
-    width: 82rem;
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    /* border: 5px solid black; */
     margin-top: 6rem;
+    height: 50rem;
+    /* overflow-y: scroll; */
 }
 
 .errList {
     flex: auto;
 }
+
 /* .err1{
     flex: auto;
 } */
@@ -836,6 +862,16 @@ export default {
     cursor: pointer
 }
 
+#er:hover {
+    background-color: #31cdbd;
+    color: blanchedalmond;
+    transition-duration: .2s;
+}
+
+#er:active {
+    background-color: #8ce8df;
+}
+
 .errHeadings {
     font-weight: bold;
     font-size: 1.2rem;
@@ -847,7 +883,8 @@ export default {
     flex: 1;
     width: 100%;
 }
-#desc{
+
+#desc {
     font-size: 1rem;
 }
 
@@ -860,14 +897,22 @@ export default {
     background-color: #21B6A8;
     color: blanchedalmond;
 }
-.errHeadings{
+
+.errHeadings {
     flex: auto;
     height: 2rem;
 }
 
 .errorDetails {
     display: flex;
-    justify-content: space-between;
+    /* justify-content: space-between; */
+    margin: 1rem;
+    overflow-y: scroll;
+}
+
+#eH {
+    font-family: 'Times New Roman', Times, serif;
+    /* text-align: center; */
 }
 
 .errorDetails li {
@@ -875,6 +920,7 @@ export default {
     list-style: none;
     padding: .8rem;
 }
+
 .tHead {
     background-color: #21B6A8;
     color: blanchedalmond;
